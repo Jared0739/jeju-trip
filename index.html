@@ -292,11 +292,11 @@ function CountdownCard() {
       style={{ background: "linear-gradient(135deg,#FFB199,#FF8FA3)" }}
     >
       {/* cute floating decorations */}
-      <span className="absolute -top-1 left-3 text-2xl rotate-[-12deg] opacity-90">🐷</span>
-      <span className="absolute -top-2 right-4 text-2xl rotate-[10deg] opacity-90">🍊</span>
+      <span className="absolute top-2 left-3 text-2xl rotate-[-12deg] opacity-90">🐷</span>
+      <span className="absolute top-2 right-4 text-2xl rotate-[10deg] opacity-90">🍊</span>
       <span className="absolute bottom-2 left-4 text-lg opacity-80">☁️</span>
       <span className="absolute bottom-3 right-3 text-lg opacity-80">✈️</span>
-      <span className="absolute top-8 left-1/2 -translate-x-1/2 text-base opacity-70">✨</span>
+      <span className="absolute top-10 left-1/2 -translate-x-1/2 text-base opacity-70">✨</span>
 
       <div className="flex items-center justify-center gap-1.5 mb-1">
         <Sparkles size={18} />
@@ -416,7 +416,7 @@ function TodayView({ setTab, setActiveDay, completed, toggleDone }) {
 
   if (idx === 0) {
     return (
-      <div className="px-4 pt-6 pb-24">
+      <div className="px-4 pt-8 pb-24">
         <CountdownCard />
 
         <SectionTitle icon={<CalendarDays size={18} color="#4A3728" />}>行程一覽</SectionTitle>
