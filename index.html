@@ -1,0 +1,1098 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>濟州小旅行・我們的家族時光</title>
+<script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+  html,body{margin:0;padding:0;background:#FFF6EC;}
+  #err-box{display:none;position:fixed;inset:0;background:#FFF6EC;padding:20px;font-family:monospace;
+    font-size:13px;color:#b3261e;white-space:pre-wrap;overflow:auto;z-index:9999;}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<div id="err-box"></div>
+<script>
+  window.addEventListener("error", function(e){
+    var box = document.getElementById("err-box");
+    box.style.display = "block";
+    box.textContent = "載入時發生錯誤：\n\n" + (e.message || e) + "\n" + (e.filename ? (e.filename + ":" + e.lineno) : "");
+  });
+</script>
+<script type="text/babel">
+const { useState, useEffect, useMemo } = React;
+const { createRoot } = ReactDOM;
+
+
+/* ---- hand-rolled icon set (no external icon library needed) ---- */
+function IconBase({ size = 20, color = "currentColor", strokeWidth = 2, viewBox = "0 0 24 24", children }) {
+  return (
+    <svg width={size} height={size} viewBox={viewBox} fill="none" stroke={color}
+      strokeWidth={strokeWidth} strokeLinecap="round" strokeLinejoin="round">
+      {children}
+    </svg>
+  );
+}
+function Home(p){ return <IconBase {...p}><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M9 22V12h6v10"/></IconBase>; }
+function CalendarDays(p){ return <IconBase {...p}><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></IconBase>; }
+function MapPin(p){ return <IconBase {...p}><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></IconBase>; }
+function UtensilsCrossed(p){ return <IconBase {...p}><path d="M3 3l18 18M21 3L3 21M8 3v6a2 2 0 0 0 4 0V3M6 3v4"/></IconBase>; }
+function MoreHorizontal({ size=20, color="currentColor" }){ return (<svg width={size} height={size} viewBox="0 0 24 24"><circle cx="5" cy="12" r="2" fill={color}/><circle cx="12" cy="12" r="2" fill={color}/><circle cx="19" cy="12" r="2" fill={color}/></svg>); }
+function Navigation2(p){ return <IconBase {...p}><path d="M12 2l8 20-8-5-8 5z" fill={p.color||"currentColor"} stroke="none"/></IconBase>; }
+function CheckCircle2(p){ return <IconBase {...p}><circle cx="12" cy="12" r="9"/><path d="M8.5 12.5l2.5 2.5 4.5-5"/></IconBase>; }
+function Circle(p){ return <IconBase {...p}><circle cx="12" cy="12" r="9"/></IconBase>; }
+function Plane(p){ return <IconBase {...p}><path d="M3 13l7-2 5-9 2 1-3 8 6-1 2 2-7 3-2 6-2-1 1-6z"/></IconBase>; }
+function Car(p){ return <IconBase {...p}><rect x="3" y="11" width="18" height="6" rx="2"/><circle cx="7.5" cy="19" r="1.6"/><circle cx="16.5" cy="19" r="1.6"/><path d="M5 11l2-5h10l2 5"/></IconBase>; }
+function HotelIcon(p){ return <IconBase {...p}><rect x="3" y="4" width="18" height="16"/><path d="M3 10h18M9 4v16M15 4v16"/></IconBase>; }
+function Phone(p){ return <IconBase {...p}><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.3 1.8.6 2.7a2 2 0 0 1-.5 2.1L8 9.7a16 16 0 0 0 6 6l1.2-1.2a2 2 0 0 1 2.1-.5c.9.3 1.8.5 2.7.6a2 2 0 0 1 1.7 2z"/></IconBase>; }
+function Banknote(p){ return <IconBase {...p}><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="3"/><path d="M6 10v4M18 10v4"/></IconBase>; }
+function ListChecks(p){ return <IconBase {...p}><path d="M3 6l1.5 1.5L7.5 4.5M3 13l1.5 1.5 3-3M10 6h11M10 13h11M10 18h7"/></IconBase>; }
+function ChevronRight(p){ return <IconBase {...p}><path d="M9 6l6 6-6 6"/></IconBase>; }
+function Clock(p){ return <IconBase {...p}><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/></IconBase>; }
+function ShoppingBag(p){ return <IconBase {...p}><path d="M6 2L4.5 6M18 2l1.5 4M3 6h18l-1.4 13.5a2 2 0 0 1-2 1.8H6.4a2 2 0 0 1-2-1.8z"/></IconBase>; }
+function AlertTriangle(p){ return <IconBase {...p}><path d="M12 2.5L1.5 21h21z"/><path d="M12 9v5M12 17h.01"/></IconBase>; }
+function X(p){ return <IconBase {...p}><path d="M18 6L6 18M6 6l12 12"/></IconBase>; }
+function Sparkles(p){ return <IconBase {...p}><path d="M12 2.5l1.6 5.2 5.2 1.6-5.2 1.6L12 16l-1.6-5.1-5.2-1.6 5.2-1.6z"/></IconBase>; }
+function CloudSun(p){ return <IconBase {...p}><circle cx="8" cy="8" r="3"/><path d="M17.5 16a4 4 0 0 0-3.9-4h-.8a5.5 5.5 0 0 0-10.4 2A3.3 3.3 0 0 0 4 20.5h12.5a3 3 0 0 0 1-5.8"/></IconBase>; }
+function Wallet(p){ return <IconBase {...p}><path d="M3 7a2 2 0 0 1 2-2h12a1 1 0 0 1 1 1v3"/><path d="M3 7v10a2 2 0 0 0 2 2h14a1 1 0 0 0 1-1v-6a1 1 0 0 0-1-1h-5a2 2 0 1 0 0 4h6"/></IconBase>; }
+function MessageCircleHeart(p){ return <IconBase {...p}><path d="M21 11.5a8.4 8.4 0 0 1-8.9 8.4A9 9 0 0 1 8 19L3 21l1.6-4.8A8.4 8.4 0 1 1 21 11.5z"/></IconBase>; }
+function Plus(p){ return <IconBase {...p}><path d="M12 5v14M5 12h14"/></IconBase>; }
+function Trash2(p){ return <IconBase {...p}><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6z"/></IconBase>; }
+function Users(p){ return <IconBase {...p}><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.9M16 3.1a4 4 0 0 1 0 7.8"/></IconBase>; }
+
+
+
+window.storage = window.storage || {
+  async get(key) {
+    const v = localStorage.getItem("jeju-app:" + key);
+    if (v === null) throw new Error("not found");
+    return { key, value: v };
+  },
+  async set(key, value) {
+    localStorage.setItem("jeju-app:" + key, value);
+    return { key, value };
+  },
+  async delete(key) {
+    localStorage.removeItem("jeju-app:" + key);
+    return { key, deleted: true };
+  },
+  async list(prefix) {
+    const keys = Object.keys(localStorage)
+      .filter(k => k.startsWith("jeju-app:" + (prefix || "")))
+      .map(k => k.replace("jeju-app:", ""));
+    return { keys };
+  }
+};
+
+/* ============================== DATA ============================== */
+
+const TRIP_START = new Date("2026-10-17T00:00:00+09:00");
+const TRIP_END = new Date("2026-10-21T23:59:59+09:00");
+
+const DAY_META = [
+  { day: 1, date: "10/17（六）", title: "抵達・入住神話世界", color: "#5B8C5A", tint: "#EAF3E9" },
+  { day: 2, date: "10/18（日）", title: "山茶花之丘・Hello Kitty樂園", color: "#E8524A", tint: "#FCEAE8" },
+  { day: 3, date: "10/19（一）", title: "9.81 Park・迷你馬・童話村", color: "#3FA6A6", tint: "#E6F4F4" },
+  { day: 4, date: "10/20（二）", title: "城山日出峰・水上樂園", color: "#8B6FB7", tint: "#F0EBF7" },
+  { day: 5, date: "10/21（三）", title: "濟州市購物・賦歸", color: "#D98C9E", tint: "#FBEEF1" },
+];
+
+// item type: transport | attraction | meal | hotel
+const ITINERARY = {
+  1: [
+    { id: "d1-1", time: "06:05", type: "transport", icon: "✈️", title: "抵達濟州機場", desc: "紅眼班機，建議下機後動作放緩，抓充裕時間通關領行李" },
+    { id: "d1-2", time: "07:30", type: "transport", icon: "🚗", title: "樂天租車取車", desc: "EV6 4WD，預訂號碼 26-22-522482" },
+    { id: "d1-3", time: "", type: "transport", icon: "🛣️", title: "驅車前往安德面", desc: "車程約50分鐘，沿途可順路停留Osulloc茶博物館" },
+    { id: "d1-4", time: "12:00", type: "hotel", icon: "🏨", title: "入住濟州神話世界", desc: "辦理入住；下午自由活動、補眠或逛免稅店", nav: "서귀포시 안덕면 서광리 2518" },
+    { id: "d1-5", time: "", type: "meal", meal: "午餐", icon: "🍜", title: "姊妹麵條", desc: "濟州知名豬肉湯麵，湯頭清爽不辣" },
+    { id: "d1-6", time: "", type: "meal", meal: "晚餐", icon: "🍽️", title: "神話世界園內用餐", desc: "選擇多元，方便省時間" },
+    { id: "d1-7", time: "", type: "attraction", icon: "🎡", title: "樂園設施提醒", desc: "泳池09:00-22:00；水上樂園11:00-19:00（10/12-10/31僅室內池，不提供毛巾）" },
+  ],
+  2: [
+    { id: "d2-1", time: "上午", type: "attraction", icon: "🌺", title: "山茶花之丘", desc: "卡蜜莉亞山茶花之丘，園區腹地大，適合悠閒散步拍照", nav: "서귀포시 안덕면 병악로 166" },
+    { id: "d2-2", time: "", type: "meal", meal: "午餐", icon: "🍝", title: "馬魯納廚房", desc: "奶油海鮮義大利麵、日式豬排，近中文觀光區" },
+    { id: "d2-3", time: "下午", type: "attraction", icon: "🎀", title: "Hello Kitty樂園", desc: "互動式展區與拍照打卡點，適合6歲小孩，預留2-3小時。開放09:00-18:00，門票成人14,000／兒童11,000韓元", nav: "서귀포시 안덕면 한창로 340" },
+    { id: "d2-4", time: "", type: "meal", meal: "晚餐", icon: "🐖", title: "七頓家中文店", desc: "黑豬肉專賣，有附小孩用副餐（海帶芽湯）" },
+  ],
+  3: [
+    { id: "d3-1", time: "上午", type: "attraction", icon: "🏎️", title: "9.81 Park", desc: "重力賽車等設施（2.5-3小時），身高需滿100公分以上", nav: "제주시 애월읍 천덕로 880-24" },
+    { id: "d3-2", time: "", type: "meal", meal: "午餐", icon: "🦐", title: "三姓穴本店", desc: "蓮洞活海鮮鍋專賣，湯頭清甜，鄰近道廳、機場", nav: "제주시 선덕로5길 20" },
+    { id: "d3-3", time: "下午", type: "attraction", icon: "🐴", title: "Cafe Batti 迷你馬體驗", desc: "餵食、近距離接觸小馬，適合小孩，開放10:00-17:00" },
+    { id: "d3-4", time: "", type: "attraction", icon: "🏘️", title: "濟州童話村", desc: "松堂童話村，色彩繽紛的造景，很好拍照", nav: "제주시 구좌읍 비자림로 1191" },
+    { id: "d3-5", time: "傍晚", type: "hotel", icon: "🏨", title: "Check-in 君悅酒店", desc: "濟州夢想大廈，換宿日行程較長，建議8點前從神話世界出發", nav: "제주시 노연로 12" },
+    { id: "d3-6", time: "", type: "meal", meal: "晚餐", icon: "🥓", title: "濟州豬肉坊", desc: "蓮洞，自助配菜式黑豬肉燒烤，彈性用餐不用照表操課" },
+  ],
+  4: [
+    { id: "d4-1", time: "上午", type: "attraction", icon: "🌅", title: "城山日出峰", desc: "車程約1小時，登頂步道約30分鐘。開放07:30-19:00，門票成人5,000／兒童2,500韓元", nav: "서귀포시 성산읍 일출로 284-12" },
+    { id: "d4-2", time: "", type: "meal", meal: "午餐", icon: "🥣", title: "城山海鮮湯／鮑魚粥", desc: "軟嫩不刺激，很適合小孩，也適合登頂後補元氣" },
+    { id: "d4-3", time: "下午", type: "attraction", icon: "🐠", title: "Aqua Planet水上星球", desc: "就在城山日出峰旁邊，超大型水族館，室內活動", nav: "서귀포시 성산읍 섭지코지로 95" },
+    { id: "d4-4", time: "", type: "meal", meal: "晚餐", icon: "🍖", title: "頓沙頓本店", desc: "老衡洞，知名黑豬近고기專賣，人氣旺可能需排隊", nav: "제주시 노형동 3086-3" },
+  ],
+  5: [
+    { id: "d5-1", time: "上午", type: "attraction", icon: "🛍️", title: "E-Mart", desc: "採買伴手禮、生鮮零食" },
+    { id: "d5-2", time: "", type: "attraction", icon: "🛒", title: "Daiso・Olive Young", desc: "都集中在濟州市新濟州商圈，一次逛完很方便" },
+    { id: "d5-3", time: "", type: "meal", meal: "午餐", icon: "🍲", title: "嫩豆腐鍋", desc: "推薦蓮洞一品順豆腐，湯頭溫和不辣" },
+    { id: "d5-4", time: "17:30", type: "transport", icon: "⛽", title: "前往機場方向", desc: "記得先加滿油再還車" },
+    { id: "d5-5", time: "19:30", type: "transport", icon: "🚙", title: "樂天租車機場還車", desc: "" },
+    { id: "d5-6", time: "", type: "meal", meal: "晚餐", icon: "🍜", title: "長壽麵", desc: "機場附近，湯麵快速方便，適合搭紅眼班機前簡單吃飽" },
+    { id: "d5-7", time: "22:40", type: "transport", icon: "✈️", title: "ZE885 搭機返台", desc: "" },
+  ],
+};
+
+const FOOD_LIST = [
+  { day: 1, meal: "午餐", name: "姊妹麵條", note: "濟州豬肉湯麵", nav: "자매국수" },
+  { day: 1, meal: "晚餐", name: "神話世界園內用餐", note: "", nav: "제주 신화월드" },
+  { day: 2, meal: "早餐", name: "Osulloc茶博物館周邊", note: "Brunch，鬆餅、抹茶系列", nav: "오설록 티뮤지엄" },
+  { day: 2, meal: "午餐", name: "馬魯納廚房 Maruna Kitchen", note: "奶油海鮮義大利麵、日式豬排", nav: "마루나키친" },
+  { day: 2, meal: "晚餐", name: "七頓家中文店", note: "黑豬肉專賣", nav: "칠돈가 중문점" },
+  { day: 3, meal: "午餐", name: "三姓穴本店", note: "蓮洞，活海鮮鍋專賣", nav: "제주시 선덕로5길 20" },
+  { day: 3, meal: "晚餐", name: "濟州豬肉坊", note: "蓮洞，自助配菜式黑豬肉燒烤", nav: "제주 돈토랑" },
+  { day: 4, meal: "午餐", name: "城山海鮮湯／鮑魚粥", note: "城山當地", nav: "성산항 해물탕" },
+  { day: 4, meal: "晚餐", name: "頓沙頓本店", note: "老衡洞，知名黑豬近고기專賣", nav: "제주시 노형동 3086-3" },
+  { day: 5, meal: "早餐", name: "君悅飯店內或東門市場周邊", note: "", nav: "제주 동문시장" },
+  { day: 5, meal: "午餐", name: "一品順豆腐", note: "蓮洞，嫩豆腐鍋", nav: "일품순두부 연동점" },
+  { day: 5, meal: "晚餐", name: "長壽麵", note: "機場附近", nav: "장수국수 제주공항점" },
+];
+
+const HOTELS = [
+  { nights: "Day1－2", name: "濟州神話世界 Jeju Shinhwa World", addrZh: "西歸浦市安德面西廣里2518號", addrKo: "서귀포시 안덕면 서광리 2518", color: "#5B8C5A" },
+  { nights: "Day3－4", name: "濟州君悅酒店 Grand Hyatt Jeju", addrZh: "濟州市老衍路12號（老衡洞，濟州夢想大廈）", addrKo: "제주시 노연로 12", color: "#8B6FB7" },
+];
+
+const CHECKLIST_ITEMS = [
+  "護照效期六個月以上",
+  "申請韓國電子入境卡（K-ETA）",
+  "海外旅遊平安保險",
+  "攜帶國際駕照（租車必備）",
+  "預留韓元現金／可海外刷卡的信用卡",
+  "小孩常備藥品",
+  "下載 Naver Map App",
+  "電壓轉接頭（220V圓頭雙孔）",
+];
+
+const WEATHER_REF = {
+  high: "22°C", low: "14°C", rain: "約30%", note: "早晚溫差大，建議洋蔥式穿搭；濟州風大，海邊景點可帶件防風外套。",
+};
+
+const EXPENSE_CATEGORIES = [
+  { key: "food", label: "餐飲", icon: "🍽️" },
+  { key: "ticket", label: "門票", icon: "🎫" },
+  { key: "shop", label: "購物", icon: "🛍️" },
+  { key: "transport", label: "交通", icon: "🚗" },
+  { key: "other", label: "其他", icon: "💰" },
+];
+
+/* ============================== HELPERS ============================== */
+
+function openNav(query) {
+  const encoded = encodeURIComponent(query);
+  const appUrl = `nmap://search?query=${encoded}&appname=jejutripapp`;
+  const webUrl = `https://map.naver.com/v5/search/${encoded}`;
+
+  const start = Date.now();
+  // try to hand off to the Naver Map app
+  window.location.href = appUrl;
+
+  // if the app didn't open within ~1.5s (page is still visible / too little time passed
+  // for an app-switch to have happened), fall back to the web version in a new tab
+  setTimeout(() => {
+    if (document.visibilityState !== "hidden" && Date.now() - start < 2200) {
+      window.open(webUrl, "_blank");
+    }
+  }, 1500);
+}
+
+function useStoredState(key, initialValue, shared = false) {
+  const [value, setValue] = useState(initialValue);
+  const [loaded, setLoaded] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await window.storage?.get(key, shared);
+        if (!cancelled && res?.value) {
+          setValue(JSON.parse(res.value));
+        }
+      } catch (e) {
+        // key doesn't exist yet, fine
+      } finally {
+        if (!cancelled) setLoaded(true);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [key]);
+
+  useEffect(() => {
+    if (!loaded) return;
+    (async () => {
+      try {
+        await window.storage?.set(key, JSON.stringify(value), shared);
+      } catch (e) {
+        console.error("storage set failed", e);
+      }
+    })();
+  }, [value, loaded, key]);
+
+  return [value, setValue, loaded];
+}
+
+// polls shared storage periodically so family members see each other's updates
+function useSharedPoll(key, intervalMs = 4000) {
+  const [tick, setTick] = useState(0);
+  useEffect(() => {
+    const t = setInterval(() => setTick((n) => n + 1), intervalMs);
+    return () => clearInterval(t);
+  }, [intervalMs]);
+  return tick;
+}
+
+function daysUntil(date) {
+  const now = new Date();
+  const diff = Math.ceil((date - now) / (1000 * 60 * 60 * 24));
+  return diff;
+}
+
+function useCountdown(targetDate) {
+  const calc = () => {
+    const diff = Math.max(0, targetDate.getTime() - Date.now());
+    return {
+      days: Math.floor(diff / 86400000),
+      hours: Math.floor((diff % 86400000) / 3600000),
+      minutes: Math.floor((diff % 3600000) / 60000),
+      seconds: Math.floor((diff % 60000) / 1000),
+      done: diff <= 0,
+    };
+  };
+  const [t, setT] = useState(calc);
+  useEffect(() => {
+    const timer = setInterval(() => setT(calc()), 1000);
+    return () => clearInterval(timer);
+  }, [targetDate]);
+  return t;
+}
+
+function CountdownCard() {
+  const t = useCountdown(TRIP_START);
+  const units = [
+    { label: "天", value: t.days },
+    { label: "時", value: t.hours },
+    { label: "分", value: t.minutes },
+    { label: "秒", value: t.seconds },
+  ];
+
+  return (
+    <div
+      className="relative rounded-3xl p-6 text-center text-white overflow-hidden"
+      style={{ background: "linear-gradient(135deg,#FFB199,#FF8FA3)" }}
+    >
+      {/* cute floating decorations */}
+      <span className="absolute -top-1 left-3 text-2xl rotate-[-12deg] opacity-90">🐷</span>
+      <span className="absolute -top-2 right-4 text-2xl rotate-[10deg] opacity-90">🍊</span>
+      <span className="absolute bottom-2 left-4 text-lg opacity-80">☁️</span>
+      <span className="absolute bottom-3 right-3 text-lg opacity-80">✈️</span>
+      <span className="absolute top-8 left-1/2 -translate-x-1/2 text-base opacity-70">✨</span>
+
+      <div className="flex items-center justify-center gap-1.5 mb-1">
+        <Sparkles size={18} />
+        <span className="text-sm font-bold opacity-95">距離濟州小旅行還有</span>
+        <Sparkles size={18} />
+      </div>
+
+      <div className="flex items-center justify-center gap-2 mt-4">
+        {units.map((u, i) => (
+          <React.Fragment key={u.label}>
+            <div className="bg-white/25 backdrop-blur rounded-2xl px-2.5 py-2 min-w-[58px]">
+              <div className="text-2xl font-black tabular-nums leading-none">
+                {String(u.value).padStart(2, "0")}
+              </div>
+              <div className="text-[10px] font-bold mt-1 opacity-90">{u.label}</div>
+            </div>
+            {i < units.length - 1 && <span className="text-xl font-black opacity-70 pb-4">:</span>}
+          </React.Fragment>
+        ))}
+      </div>
+
+      <div className="text-[11px] font-bold opacity-90 mt-4">🐖🍊 黑豬和橘子在濟州等你們囉 🍊🐖</div>
+    </div>
+  );
+}
+
+function getTripDayIndex() {
+  const now = new Date();
+  if (now < TRIP_START) return 0; // before trip
+  if (now > TRIP_END) return -1; // after trip
+  const diff = Math.floor((now - TRIP_START) / (1000 * 60 * 60 * 24)) + 1;
+  return Math.min(Math.max(diff, 1), 5);
+}
+
+/* ============================== UI PIECES ============================== */
+
+function TypeIconBg({ type }) {
+  const map = {
+    transport: "#DCE9F5",
+    attraction: "#FDECC8",
+    meal: "#FCE1E4",
+    hotel: "#E6E0F5",
+  };
+  return map[type] || "#EEE";
+}
+
+function ItemCard({ item, color, done, onToggle, compact }) {
+  return (
+    <div
+      className="flex gap-3 rounded-2xl border-2 bg-white p-3 items-start"
+      style={{ borderColor: done ? "#D8D0C4" : color, opacity: done ? 0.55 : 1 }}
+    >
+      <button
+        onClick={() => onToggle(item.id)}
+        className="mt-0.5 shrink-0"
+        aria-label="標記完成"
+      >
+        {done ? (
+          <CheckCircle2 size={22} color="#9C9182" />
+        ) : (
+          <Circle size={22} color={color} />
+        )}
+      </button>
+
+      <div
+        className="w-9 h-9 rounded-xl shrink-0 flex items-center justify-center text-lg"
+        style={{ background: TypeIconBg({ type: item.type }) }}
+      >
+        {item.icon}
+      </div>
+
+      <div className="flex-1 min-w-0">
+        <div className="flex items-baseline gap-2 flex-wrap">
+          {item.time && (
+            <span className="text-xs font-extrabold" style={{ color }}>{item.time}</span>
+          )}
+          {item.meal && (
+            <span
+              className="text-[10px] font-extrabold px-2 py-0.5 rounded-full text-white"
+              style={{ background: color }}
+            >
+              {item.meal}
+            </span>
+          )}
+          <span className="font-bold text-[#4A3728] text-[15px] leading-snug">{item.title}</span>
+        </div>
+        {!compact && item.desc && (
+          <p className="text-[12.5px] text-[#7A6A57] mt-1 leading-relaxed">{item.desc}</p>
+        )}
+        {item.nav && (
+          <button
+            onClick={() => openNav(item.nav)}
+            className="inline-flex items-center gap-1 text-[12px] font-bold mt-2 px-3 py-1.5 rounded-full text-white"
+            style={{ background: color }}
+          >
+            <Navigation2 size={12} /> 導航
+          </button>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function SectionTitle({ children, icon }) {
+  return (
+    <div className="flex items-center gap-2 mb-3 mt-1">
+      {icon}
+      <h2 className="text-[15px] font-black text-[#4A3728]">{children}</h2>
+    </div>
+  );
+}
+
+/* ============================== VIEWS ============================== */
+
+function TodayView({ setTab, setActiveDay, completed, toggleDone }) {
+  const idx = getTripDayIndex();
+
+  if (idx === 0) {
+    return (
+      <div className="px-4 pt-6 pb-24">
+        <CountdownCard />
+
+        <SectionTitle icon={<CalendarDays size={18} color="#4A3728" />}>行程一覽</SectionTitle>
+        <div className="space-y-2">
+          {DAY_META.map((d) => (
+            <button
+              key={d.day}
+              onClick={() => { setActiveDay(d.day); setTab("itinerary"); }}
+              className="w-full flex items-center gap-3 bg-white rounded-2xl border-2 p-3 text-left"
+              style={{ borderColor: d.color }}
+            >
+              <span
+                className="text-xs font-black text-white px-2.5 py-1 rounded-full shrink-0"
+                style={{ background: d.color }}
+              >
+                Day{d.day}
+              </span>
+              <div className="min-w-0">
+                <div className="text-[11px] text-[#9C8A73] font-bold">{d.date}</div>
+                <div className="font-bold text-[#4A3728] text-[13.5px] truncate">{d.title}</div>
+              </div>
+              <ChevronRight size={18} className="ml-auto shrink-0 text-[#C9BBA0]" />
+            </button>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  if (idx === -1) {
+    return (
+      <div className="px-4 pt-16 pb-24 text-center">
+        <div className="text-5xl mb-3">🐷🍊</div>
+        <div className="font-black text-lg text-[#4A3728]">旅程結束囉，辛苦了！</div>
+        <p className="text-sm text-[#9C8A73] mt-2">歡迎隨時回來翻看這幾天的回憶</p>
+      </div>
+    );
+  }
+
+  const meta = DAY_META[idx - 1];
+  const items = ITINERARY[idx];
+  const doneCount = items.filter((i) => completed[i.id]).length;
+
+  return (
+    <div className="px-4 pt-6 pb-24">
+      <div className="rounded-3xl p-5 text-white" style={{ background: meta.color }}>
+        <div className="text-xs font-bold opacity-90">今天是</div>
+        <div className="text-2xl font-black mt-1">Day{meta.day}｜{meta.date}</div>
+        <div className="text-sm font-bold mt-1 opacity-95">{meta.title}</div>
+        <div className="mt-3 h-2 rounded-full bg-white/30 overflow-hidden">
+          <div className="h-full bg-white rounded-full" style={{ width: `${(doneCount / items.length) * 100}%` }} />
+        </div>
+        <div className="text-[11px] mt-1 opacity-90">已完成 {doneCount}／{items.length} 項</div>
+      </div>
+
+      <SectionTitle icon={<Clock size={18} color="#4A3728" />}>今日時間軸</SectionTitle>
+      <div className="space-y-2">
+        {items.map((item) => (
+          <ItemCard key={item.id} item={item} color={meta.color} done={!!completed[item.id]} onToggle={toggleDone} />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function ItineraryView({ activeDay, setActiveDay, completed, toggleDone }) {
+  const meta = DAY_META[activeDay - 1];
+  const items = ITINERARY[activeDay];
+
+  return (
+    <div className="pb-24">
+      <div className="flex overflow-x-auto px-4 pt-4 pb-3 gap-2 sticky bg-[#FFF6EC] z-10" style={{ top: "56px" }}>
+        {DAY_META.map((d) => (
+          <button
+            key={d.day}
+            onClick={() => setActiveDay(d.day)}
+            className="shrink-0 px-4 py-2 rounded-full text-[13px] font-black border-2"
+            style={{
+              background: activeDay === d.day ? d.color : "white",
+              color: activeDay === d.day ? "white" : d.color,
+              borderColor: d.color,
+            }}
+          >
+            Day{d.day}
+          </button>
+        ))}
+      </div>
+
+      <div className="px-4">
+        <div className="rounded-2xl p-4 mb-4" style={{ background: meta.tint }}>
+          <div className="text-[11px] font-bold" style={{ color: meta.color }}>{meta.date}</div>
+          <div className="font-black text-[#4A3728] text-[17px]">{meta.title}</div>
+        </div>
+
+        <div className="space-y-2">
+          {items.map((item) => (
+            <ItemCard key={item.id} item={item} color={meta.color} done={!!completed[item.id]} onToggle={toggleDone} />
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function MapView() {
+  const [filterDay, setFilterDay] = useState(0); // 0 = all
+
+  const allSpots = useMemo(() => {
+    const spots = [];
+    Object.entries(ITINERARY).forEach(([day, items]) => {
+      items.forEach((it) => {
+        if (it.nav) spots.push({ ...it, day: Number(day) });
+      });
+    });
+    HOTELS.forEach((h) => {
+      spots.push({ id: h.name, title: h.name, desc: h.addrZh, nav: h.addrKo, icon: "🏨", day: h.nights.includes("1") ? 1 : 3, meal: null });
+    });
+    return spots;
+  }, []);
+
+  const visible = filterDay === 0 ? allSpots : allSpots.filter((s) => s.day === filterDay);
+
+  return (
+    <div className="px-4 pt-4 pb-24">
+      <SectionTitle icon={<MapPin size={18} color="#4A3728" />}>景點地址快查</SectionTitle>
+      <div className="flex overflow-x-auto gap-2 mb-4 pb-1">
+        <button
+          onClick={() => setFilterDay(0)}
+          className="shrink-0 px-4 py-1.5 rounded-full text-[12.5px] font-black border-2"
+          style={{ background: filterDay === 0 ? "#4A3728" : "white", color: filterDay === 0 ? "white" : "#4A3728", borderColor: "#4A3728" }}
+        >
+          全部
+        </button>
+        {DAY_META.map((d) => (
+          <button
+            key={d.day}
+            onClick={() => setFilterDay(d.day)}
+            className="shrink-0 px-4 py-1.5 rounded-full text-[12.5px] font-black border-2"
+            style={{ background: filterDay === d.day ? d.color : "white", color: filterDay === d.day ? "white" : d.color, borderColor: d.color }}
+          >
+            Day{d.day}
+          </button>
+        ))}
+      </div>
+
+      <div className="space-y-2">
+        {visible.map((s, idx) => {
+          const color = DAY_META[s.day - 1].color;
+          return (
+            <div key={s.id + idx} className="flex items-center gap-3 bg-white rounded-2xl border-2 p-3" style={{ borderColor: color }}>
+              <div className="w-9 h-9 rounded-xl shrink-0 flex items-center justify-center text-lg" style={{ background: TypeIconBg({ type: s.type }) }}>
+                {s.icon}
+              </div>
+              <div className="min-w-0 flex-1">
+                <div className="font-bold text-[13.5px] text-[#4A3728] truncate">{s.title}</div>
+                <div className="text-[11px] text-[#9C8A73] truncate">{s.nav}</div>
+              </div>
+              <button
+                onClick={() => openNav(s.nav)}
+                className="shrink-0 w-9 h-9 rounded-full flex items-center justify-center text-white"
+                style={{ background: color }}
+              >
+                <Navigation2 size={16} />
+              </button>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+function FoodView() {
+  const [filterMeal, setFilterMeal] = useState("全部");
+  const meals = ["全部", "早餐", "午餐", "晚餐"];
+  const visible = filterMeal === "全部" ? FOOD_LIST : FOOD_LIST.filter((f) => f.meal === filterMeal);
+
+  return (
+    <div className="px-4 pt-4 pb-24">
+      <SectionTitle icon={<UtensilsCrossed size={18} color="#4A3728" />}>美食清單</SectionTitle>
+      <div className="flex gap-2 mb-4">
+        {meals.map((m) => (
+          <button
+            key={m}
+            onClick={() => setFilterMeal(m)}
+            className="px-4 py-1.5 rounded-full text-[12.5px] font-black border-2"
+            style={{ background: filterMeal === m ? "#E8524A" : "white", color: filterMeal === m ? "white" : "#E8524A", borderColor: "#E8524A" }}
+          >
+            {m}
+          </button>
+        ))}
+      </div>
+
+      <div className="space-y-2">
+        {visible.map((f, i) => {
+          const color = DAY_META[f.day - 1].color;
+          return (
+            <div key={i} className="bg-white rounded-2xl border-2 p-3" style={{ borderColor: color }}>
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="text-[10px] font-black text-white px-2 py-0.5 rounded-full" style={{ background: color }}>
+                  Day{f.day}
+                </span>
+                <span className="text-[10px] font-black px-2 py-0.5 rounded-full" style={{ background: "#FFD972", color: "#4A3728" }}>
+                  {f.meal}
+                </span>
+                <span className="font-bold text-[#4A3728] text-[14px]">{f.name}</span>
+              </div>
+              {f.note && <p className="text-[12px] text-[#9C8A73] mt-1.5">{f.note}</p>}
+              {f.nav && (
+                <button
+                  onClick={() => openNav(f.nav)}
+                  className="inline-flex items-center gap-1 text-[11.5px] font-bold mt-2 px-3 py-1 rounded-full text-white"
+                  style={{ background: color }}
+                >
+                  <Navigation2 size={11} /> 導航
+                </button>
+              )}
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+function CurrencyTool() {
+  const [krw, setKrw] = useState("10000");
+  const [rate, setRate] = useState(0.0227);
+  const [status, setStatus] = useState("loading"); // loading | live | manual
+  const [updatedAt, setUpdatedAt] = useState(null);
+  const twd = (parseFloat(krw || 0) * parseFloat(rate || 0)).toFixed(0);
+
+  const quickRates = [0.022, 0.0227, 0.023, 0.024];
+
+  const SOURCES = [
+    {
+      url: "https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies/krw.json",
+      parse: (d) => d?.krw?.twd,
+    },
+    {
+      url: "https://latest.currency-api.pages.dev/v1/currencies/krw.json",
+      parse: (d) => d?.krw?.twd,
+    },
+    {
+      url: "https://open.er-api.com/v6/latest/KRW",
+      parse: (d) => d?.rates?.TWD,
+    },
+  ];
+
+  const fetchRate = async () => {
+    setStatus("loading");
+    for (const src of SOURCES) {
+      try {
+        const ctrl = new AbortController();
+        const t = setTimeout(() => ctrl.abort(), 5000);
+        const res = await fetch(src.url, { signal: ctrl.signal });
+        clearTimeout(t);
+        if (!res.ok) continue;
+        const data = await res.json();
+        const val = src.parse(data);
+        if (val && !isNaN(val)) {
+          setRate(Number(val));
+          setUpdatedAt(new Date().toLocaleString("zh-TW", { hour12: false }));
+          setStatus("live");
+          return;
+        }
+      } catch (e) {
+        // try next source
+      }
+    }
+    setStatus("manual");
+  };
+
+  useEffect(() => { fetchRate(); }, []);
+
+  return (
+    <div className="bg-white rounded-2xl border-2 border-[#5B8C5A] p-4">
+      <div className="flex items-center justify-between mb-3">
+        <div className="flex items-center gap-2">
+          <Banknote size={18} color="#5B8C5A" />
+          <span className="font-black text-[#4A3728] text-[14px]">韓元 → 台幣快算</span>
+        </div>
+        <button
+          onClick={fetchRate}
+          disabled={status === "loading"}
+          className="text-[11px] font-bold text-[#5B8C5A] border border-[#5B8C5A] rounded-full px-2.5 py-1"
+        >
+          {status === "loading" ? "抓取中…" : "🔄 重新抓取"}
+        </button>
+      </div>
+      <div className="flex items-center gap-2">
+        <input
+          type="number"
+          value={krw}
+          onChange={(e) => setKrw(e.target.value)}
+          className="flex-1 border-2 border-[#E5DCC8] rounded-xl px-3 py-2 text-[14px] font-bold text-[#4A3728]"
+        />
+        <span className="text-[12px] font-bold text-[#9C8A73]">KRW</span>
+      </div>
+      <div className="text-center my-2 text-[#C9BBA0]">↓</div>
+      <div className="flex items-center gap-2">
+        <div className="flex-1 border-2 border-[#5B8C5A] bg-[#EAF3E9] rounded-xl px-3 py-2 text-[16px] font-black text-[#4A3728]">
+          {twd}
+        </div>
+        <span className="text-[12px] font-bold text-[#9C8A73]">TWD</span>
+      </div>
+
+      <div className="flex items-center gap-2 mt-3 text-[11px] text-[#9C8A73]">
+        <span>匯率</span>
+        <input
+          type="number"
+          step="0.0001"
+          value={rate}
+          onChange={(e) => { setRate(e.target.value); setStatus("manual"); }}
+          className="w-24 border-2 border-[#5B8C5A] rounded-lg px-2 py-1 text-[11px] font-bold text-[#4A3728]"
+        />
+        <span>／1韓元</span>
+      </div>
+
+      {status === "manual" && (
+        <div className="flex gap-1.5 mt-2 flex-wrap">
+          {quickRates.map((r) => (
+            <button
+              key={r}
+              onClick={() => setRate(r)}
+              className="text-[10.5px] font-bold px-2.5 py-1 rounded-full border"
+              style={{
+                background: rate === r ? "#5B8C5A" : "white",
+                color: rate === r ? "white" : "#5B8C5A",
+                borderColor: "#5B8C5A",
+              }}
+            >
+              {r}
+            </button>
+          ))}
+        </div>
+      )}
+
+      {status === "live" && (
+        <p className="text-[10px] text-[#5B8C5A] mt-2">✓ 已抓取即時匯率，更新於 {updatedAt}</p>
+      )}
+      {status === "manual" && (
+        <p className="text-[10px] text-[#D98C9E] mt-2">⚠️ 即時抓取失敗，已改為手動模式，請自行輸入匯率或點選上方快速選項</p>
+      )}
+    </div>
+  );
+}
+
+function WeatherCard() {
+  return (
+    <div className="bg-white rounded-2xl border-2 border-[#3FA6A6] p-4">
+      <div className="flex items-center gap-2 mb-3">
+        <CloudSun size={18} color="#3FA6A6" />
+        <span className="font-black text-[#4A3728] text-[14px]">10月濟州氣候參考</span>
+      </div>
+      <div className="flex gap-3">
+        <div className="flex-1 bg-[#E6F4F4] rounded-xl p-3 text-center">
+          <div className="text-[11px] text-[#5B9999] font-bold">平均高溫</div>
+          <div className="text-xl font-black text-[#3FA6A6] mt-1">{WEATHER_REF.high}</div>
+        </div>
+        <div className="flex-1 bg-[#E6F4F4] rounded-xl p-3 text-center">
+          <div className="text-[11px] text-[#5B9999] font-bold">平均低溫</div>
+          <div className="text-xl font-black text-[#3FA6A6] mt-1">{WEATHER_REF.low}</div>
+        </div>
+        <div className="flex-1 bg-[#E6F4F4] rounded-xl p-3 text-center">
+          <div className="text-[11px] text-[#5B9999] font-bold">降雨機率</div>
+          <div className="text-xl font-black text-[#3FA6A6] mt-1">{WEATHER_REF.rain}</div>
+        </div>
+      </div>
+      <p className="text-[11.5px] text-[#9C8A73] mt-3 leading-relaxed">{WEATHER_REF.note}</p>
+      <p className="text-[10px] text-[#C9BBA0] mt-2">※ 為歷史平均值，非即時預報，出發前請另查即時氣象</p>
+    </div>
+  );
+}
+
+function ExpenseTracker() {
+  const [items, setItems, loaded] = useStoredState("jeju-expenses", [], true);
+  const [showAdd, setShowAdd] = useState(false);
+  const [day, setDay] = useState(1);
+  const [cat, setCat] = useState("food");
+  const [amount, setAmount] = useState("");
+  const [note, setNote] = useState("");
+  const [rate] = useState(0.023);
+
+  const total = items.reduce((s, i) => s + Number(i.amount || 0), 0);
+
+  const addItem = () => {
+    if (!amount) return;
+    const next = [...items, { id: Date.now(), day, cat, amount: Number(amount), note }];
+    setItems(next);
+    setAmount(""); setNote(""); setShowAdd(false);
+  };
+  const removeItem = (id) => setItems(items.filter((i) => i.id !== id));
+
+  return (
+    <div className="bg-white rounded-2xl border-2 border-[#D98C9E] p-4">
+      <div className="flex items-center justify-between mb-1">
+        <div className="flex items-center gap-2">
+          <Wallet size={18} color="#D98C9E" />
+          <span className="font-black text-[#4A3728] text-[14px]">全家花費記錄</span>
+        </div>
+        <span className="text-[10px] text-[#B3A88F] flex items-center gap-1"><Users size={12} /> 家人共用</span>
+      </div>
+
+      <div className="bg-[#FBEEF1] rounded-xl p-3 my-3 text-center">
+        <div className="text-[11px] text-[#B3718A] font-bold">目前總花費</div>
+        <div className="text-2xl font-black text-[#D98C9E] mt-1">₩{total.toLocaleString()}</div>
+        <div className="text-[11px] text-[#B3718A]">約 NT${Math.round(total * rate).toLocaleString()}</div>
+      </div>
+
+      {items.length > 0 && (
+        <div className="space-y-1.5 mb-3 max-h-48 overflow-y-auto">
+          {[...items].reverse().map((it) => (
+            <div key={it.id} className="flex items-center gap-2 text-[12.5px] bg-[#FFF8F5] rounded-lg px-2.5 py-2">
+              <span>{EXPENSE_CATEGORIES.find((c) => c.key === it.cat)?.icon}</span>
+              <span className="text-[#9C8A73] font-bold">Day{it.day}</span>
+              <span className="flex-1 text-[#4A3728] truncate">{it.note || EXPENSE_CATEGORIES.find((c) => c.key === it.cat)?.label}</span>
+              <span className="font-bold text-[#4A3728]">₩{Number(it.amount).toLocaleString()}</span>
+              <button onClick={() => removeItem(it.id)}><Trash2 size={14} color="#C9BBA0" /></button>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {!showAdd ? (
+        <button onClick={() => setShowAdd(true)} className="w-full flex items-center justify-center gap-1.5 border-2 border-dashed border-[#D98C9E] text-[#D98C9E] font-bold rounded-xl py-2.5 text-[13px]">
+          <Plus size={16} /> 新增一筆花費
+        </button>
+      ) : (
+        <div className="space-y-2 bg-[#FFF8F5] rounded-xl p-3">
+          <div className="flex gap-1.5 overflow-x-auto">
+            {DAY_META.map((d) => (
+              <button key={d.day} onClick={() => setDay(d.day)} className="shrink-0 px-3 py-1 rounded-full text-[11.5px] font-bold border-2"
+                style={{ background: day === d.day ? d.color : "white", color: day === d.day ? "white" : d.color, borderColor: d.color }}>
+                Day{d.day}
+              </button>
+            ))}
+          </div>
+          <div className="flex gap-1.5 flex-wrap">
+            {EXPENSE_CATEGORIES.map((c) => (
+              <button key={c.key} onClick={() => setCat(c.key)} className="px-2.5 py-1 rounded-full text-[11.5px] font-bold border-2"
+                style={{ background: cat === c.key ? "#D98C9E" : "white", color: cat === c.key ? "white" : "#D98C9E", borderColor: "#D98C9E" }}>
+                {c.icon} {c.label}
+              </button>
+            ))}
+          </div>
+          <input type="number" placeholder="金額（韓元）" value={amount} onChange={(e) => setAmount(e.target.value)}
+            className="w-full border-2 border-[#E5DCC8] rounded-xl px-3 py-2 text-[13.5px] font-bold text-[#4A3728]" />
+          <input type="text" placeholder="備註（選填）" value={note} onChange={(e) => setNote(e.target.value)}
+            className="w-full border-2 border-[#E5DCC8] rounded-xl px-3 py-2 text-[13px] text-[#4A3728]" />
+          <div className="flex gap-2">
+            <button onClick={() => setShowAdd(false)} className="flex-1 border-2 border-[#E5DCC8] text-[#9C8A73] font-bold rounded-xl py-2 text-[13px]">取消</button>
+            <button onClick={addItem} className="flex-1 bg-[#D98C9E] text-white font-bold rounded-xl py-2 text-[13px]">儲存</button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+function FamilyNotes() {
+  const [notes, setNotes] = useStoredState("jeju-family-notes", [], true);
+  const [name, setName] = useState("");
+  const [text, setText] = useState("");
+
+  const addNote = () => {
+    if (!text.trim()) return;
+    const next = [...notes, { id: Date.now(), name: name.trim() || "家人", text: text.trim() }];
+    setNotes(next);
+    setText("");
+  };
+  const removeNote = (id) => setNotes(notes.filter((n) => n.id !== id));
+
+  return (
+    <div className="bg-white rounded-2xl border-2 border-[#8B6FB7] p-4">
+      <div className="flex items-center justify-between mb-3">
+        <div className="flex items-center gap-2">
+          <MessageCircleHeart size={18} color="#8B6FB7" />
+          <span className="font-black text-[#4A3728] text-[14px]">家庭共享備註</span>
+        </div>
+        <span className="text-[10px] text-[#B3A88F] flex items-center gap-1"><Users size={12} /> 家人共用</span>
+      </div>
+
+      {notes.length > 0 && (
+        <div className="space-y-2 mb-3 max-h-52 overflow-y-auto">
+          {[...notes].reverse().map((n) => (
+            <div key={n.id} className="bg-[#F0EBF7] rounded-xl p-2.5">
+              <div className="flex items-center justify-between">
+                <span className="text-[11px] font-black text-[#8B6FB7]">{n.name}</span>
+                <button onClick={() => removeNote(n.id)}><Trash2 size={13} color="#C4B8DB" /></button>
+              </div>
+              <p className="text-[13px] text-[#4A3728] mt-1 leading-relaxed">{n.text}</p>
+            </div>
+          ))}
+        </div>
+      )}
+
+      <div className="flex gap-2 mb-2">
+        <input type="text" placeholder="你的稱呼" value={name} onChange={(e) => setName(e.target.value)}
+          className="w-24 border-2 border-[#E5DCC8] rounded-xl px-2.5 py-2 text-[12.5px] text-[#4A3728]" />
+        <input type="text" placeholder="留言給家人..." value={text} onChange={(e) => setText(e.target.value)}
+          onKeyDown={(e) => e.key === "Enter" && addNote()}
+          className="flex-1 border-2 border-[#E5DCC8] rounded-xl px-3 py-2 text-[12.5px] text-[#4A3728]" />
+      </div>
+      <button onClick={addNote} className="w-full bg-[#8B6FB7] text-white font-bold rounded-xl py-2 text-[13px]">送出留言</button>
+    </div>
+  );
+}
+
+function MoreView({ checklist, toggleCheck }) {
+  const [showEmergency, setShowEmergency] = useState(false);
+  const doneCount = Object.values(checklist).filter(Boolean).length;
+
+  return (
+    <div className="px-4 pt-4 pb-24 space-y-5">
+      <SectionTitle icon={<Plane size={18} color="#4A3728" />}>航班資訊</SectionTitle>
+      <div className="bg-white rounded-2xl border-2 border-[#4A3728] p-4 space-y-2 text-[13px]">
+        <div className="flex justify-between"><span className="text-[#9C8A73] font-bold">去程</span><span className="font-bold text-[#4A3728]">ZE886　02:50桃園起飛／06:05抵濟州</span></div>
+        <div className="flex justify-between"><span className="text-[#9C8A73] font-bold">回程</span><span className="font-bold text-[#4A3728]">ZE885　22:40濟州起飛／隔日00:05抵桃園</span></div>
+        <div className="flex justify-between"><span className="text-[#9C8A73] font-bold">航廈</span><span className="font-bold text-[#4A3728]">易斯達航空・桃園第一航廈</span></div>
+      </div>
+
+      <SectionTitle icon={<Car size={18} color="#4A3728" />}>租車資訊</SectionTitle>
+      <div className="bg-white rounded-2xl border-2 border-[#4A3728] p-4 space-y-2 text-[13px]">
+        <div className="flex justify-between"><span className="text-[#9C8A73] font-bold">車型</span><span className="font-bold text-[#4A3728]">樂天租車 EV6 4WD</span></div>
+        <div className="flex justify-between"><span className="text-[#9C8A73] font-bold">預訂號碼</span><span className="font-bold text-[#4A3728]">26-22-522482</span></div>
+        <div className="flex justify-between"><span className="text-[#9C8A73] font-bold">取車</span><span className="font-bold text-[#4A3728]">10/17 07:30，濟州機場</span></div>
+        <div className="flex justify-between"><span className="text-[#9C8A73] font-bold">還車</span><span className="font-bold text-[#4A3728]">10/21 19:30，濟州機場</span></div>
+      </div>
+
+      <SectionTitle icon={<HotelIcon size={18} color="#4A3728" />}>住宿資訊</SectionTitle>
+      <div className="space-y-2">
+        {HOTELS.map((h) => (
+          <div key={h.name} className="bg-white rounded-2xl border-2 p-4" style={{ borderColor: h.color }}>
+            <span className="text-[10px] font-black text-white px-2 py-0.5 rounded-full" style={{ background: h.color }}>{h.nights}</span>
+            <div className="font-bold text-[#4A3728] text-[14px] mt-2">{h.name}</div>
+            <div className="text-[12px] text-[#9C8A73] mt-1">{h.addrZh}</div>
+            <button onClick={() => openNav(h.addrKo)} className="inline-flex items-center gap-1 text-[11.5px] font-bold mt-2 px-3 py-1 rounded-full text-white" style={{ background: h.color }}>
+              <Navigation2 size={11} /> 導航
+            </button>
+          </div>
+        ))}
+      </div>
+
+      <CurrencyTool />
+
+      <SectionTitle icon={<Wallet size={18} color="#4A3728" />}>記帳與備註</SectionTitle>
+      <ExpenseTracker />
+      <FamilyNotes />
+      <WeatherCard />
+
+      <SectionTitle icon={<ListChecks size={18} color="#4A3728" />}>出發前檢查清單（{doneCount}／{CHECKLIST_ITEMS.length}）</SectionTitle>
+      <div className="bg-white rounded-2xl border-2 border-[#4A3728] p-2">
+        {CHECKLIST_ITEMS.map((it, i) => (
+          <button
+            key={i}
+            onClick={() => toggleCheck(i)}
+            className="w-full flex items-center gap-3 p-2.5 text-left"
+          >
+            {checklist[i] ? <CheckCircle2 size={20} color="#5B8C5A" /> : <Circle size={20} color="#C9BBA0" />}
+            <span className={`text-[13.5px] font-bold ${checklist[i] ? "text-[#B3A88F] line-through" : "text-[#4A3728]"}`}>{it}</span>
+          </button>
+        ))}
+      </div>
+
+      <button
+        onClick={() => setShowEmergency(true)}
+        className="w-full flex items-center justify-center gap-2 bg-[#E8524A] text-white font-black rounded-2xl py-3.5 text-[14px]"
+      >
+        <AlertTriangle size={18} /> 緊急聯絡資訊
+      </button>
+
+      {showEmergency && (
+        <div className="fixed inset-0 bg-black/40 flex items-end z-50" onClick={() => setShowEmergency(false)}>
+          <div className="bg-white rounded-t-3xl w-full p-5 space-y-3" onClick={(e) => e.stopPropagation()}>
+            <div className="flex justify-between items-center">
+              <span className="font-black text-[#4A3728] text-[16px] flex items-center gap-2"><Phone size={18} /> 緊急聯絡資訊</span>
+              <button onClick={() => setShowEmergency(false)}><X size={22} color="#9C8A73" /></button>
+            </div>
+            <div className="space-y-2 text-[13.5px]">
+              <div className="flex justify-between bg-[#FCEAE8] rounded-xl p-3"><span className="font-bold text-[#4A3728]">警察／消防</span><span className="font-black text-[#E8524A]">112／119</span></div>
+              <div className="flex justify-between bg-[#EAF3E9] rounded-xl p-3"><span className="font-bold text-[#4A3728]">觀光諮詢（中文可通）</span><span className="font-black text-[#5B8C5A]">1330</span></div>
+              <div className="bg-[#F0EBF7] rounded-xl p-3">
+                <div className="font-bold text-[#4A3728]">駐韓國台北代表部</div>
+                <div className="text-[#7A6A57] mt-1">總機 +82-2-399-2769</div>
+                <div className="text-[#7A6A57] mt-1">急難救助：+886-800-085-095（境外）</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <p className="text-center text-[11px] text-[#B3A88F] pt-2">濟州小旅行・我們的家族時光 🐷🍊</p>
+    </div>
+  );
+}
+
+/* ============================== APP SHELL ============================== */
+
+const TABS = [
+  { key: "today", label: "今日", icon: Home },
+  { key: "itinerary", label: "行程", icon: CalendarDays },
+  { key: "map", label: "地圖", icon: MapPin },
+  { key: "food", label: "美食", icon: UtensilsCrossed },
+  { key: "more", label: "更多", icon: MoreHorizontal },
+];
+
+function App() {
+  const [tab, setTab] = useState("today");
+  const [activeDay, setActiveDay] = useState(Math.max(getTripDayIndex(), 1));
+  const [completed, setCompleted] = useStoredState("jeju-completed-items", {});
+  const [checklist, setChecklist] = useStoredState("jeju-checklist", {});
+
+  const toggleDone = (id) => setCompleted((c) => ({ ...c, [id]: !c[id] }));
+  const toggleCheck = (i) => setChecklist((c) => ({ ...c, [i]: !c[i] }));
+
+  return (
+    <div className="min-h-screen bg-[#FFF6EC]" style={{ fontFamily: "'Noto Sans TC','PingFang TC',sans-serif", colorScheme: "light" }}>
+      <style>{`
+        html, body, #root { background-color: #FFF6EC !important; color-scheme: light; }
+      `}</style>
+      <div className="max-w-md mx-auto relative min-h-screen bg-[#FFF6EC]">
+        {/* Top bar */}
+        <div
+          className="sticky top-0 z-20 bg-[#FFF6EC] px-4 flex items-center gap-2 border-b-2 border-[#F0E4D0]"
+          style={{ height: "56px", boxSizing: "border-box" }}
+        >
+          <span className="text-xl">🐷</span>
+          <span className="font-black text-[#4A3728] text-[16px]">濟州小旅行</span>
+          <span className="text-xl ml-auto">🍊</span>
+        </div>
+
+        {/* Views */}
+        {tab === "today" && (
+          <TodayView setTab={setTab} setActiveDay={setActiveDay} completed={completed} toggleDone={toggleDone} />
+        )}
+        {tab === "itinerary" && (
+          <ItineraryView activeDay={activeDay} setActiveDay={setActiveDay} completed={completed} toggleDone={toggleDone} />
+        )}
+        {tab === "map" && <MapView />}
+        {tab === "food" && <FoodView />}
+        {tab === "more" && <MoreView checklist={checklist} toggleCheck={toggleCheck} />}
+
+        {/* Bottom nav */}
+        <div className="fixed bottom-0 left-0 right-0 z-20">
+          <div className="max-w-md mx-auto bg-white border-t-2 border-[#EFE6D6] flex px-1 py-1.5">
+            {TABS.map((t) => {
+              const Icon = t.icon;
+              const active = tab === t.key;
+              return (
+                <button
+                  key={t.key}
+                  onClick={() => setTab(t.key)}
+                  className="flex-1 flex flex-col items-center gap-0.5 py-1.5 rounded-xl"
+                >
+                  <Icon size={20} color={active ? "#E8524A" : "#B3A88F"} strokeWidth={active ? 2.6 : 2} />
+                  <span className="text-[10px] font-bold" style={{ color: active ? "#E8524A" : "#B3A88F" }}>
+                    {t.label}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+
+try {
+  createRoot(document.getElementById("root")).render(<App />);
+} catch (e) {
+  document.getElementById("err-box").style.display = "block";
+  document.getElementById("err-box").textContent = "渲染錯誤：\n" + e.message + "\n" + e.stack;
+}
+</script>
+</body>
+</html>
