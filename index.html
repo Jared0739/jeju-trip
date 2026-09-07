@@ -132,6 +132,7 @@ const ITINERARY = {
     { id: "d3-3", time: "下午", type: "attraction", icon: "🐴", title: "Cafe Batti 迷你馬體驗", desc: "餵食、近距離接觸小馬，適合小孩，開放10:00-17:00", nav: "카페바띠 제주" },
     { id: "d3-4", time: "", type: "attraction", icon: "🏘️", title: "濟州童話村", desc: "松堂童話村，色彩繽紛的造景，很好拍照", nav: "제주시 구좌읍 비자림로 1191" },
     { id: "d3-5", time: "傍晚", type: "hotel", icon: "🏨", title: "Check-in 君悅酒店", desc: "濟州夢想大廈，換宿日行程較長，建議8點前從神話世界出發", nav: "제주시 노연로 12" },
+    { id: "d3-5b", time: "", type: "attraction", icon: "🔋", title: "順路充電", desc: "노형동／연동一帶환경부充電站密度高，可利用今晚或明早出發前順道充一次，詳見「更多」頁充電資訊" },
     { id: "d3-6", time: "", type: "meal", meal: "晚餐", icon: "🍲", title: "正韓土俗參雞湯", desc: "정한토속삼계탕，蓮洞，20年老店，招牌鮑魚參雞湯，有兒童椅，開放11:00-23:00", nav: "제주시 신대로18길 16" },
   ],
   4: [
@@ -146,7 +147,7 @@ const ITINERARY = {
     { id: "d5-1", time: "上午", type: "attraction", icon: "🛍️", title: "E-Mart", desc: "採買伴手禮、生鮮零食，1100로3348（노형오거리）", nav: "제주시 1100로 3348" },
     { id: "d5-2", time: "", type: "attraction", icon: "🛒", title: "Daiso・Olive Young", desc: "都集中在濟州市新濟州商圈，一次逛完很方便" },
     { id: "d5-3", time: "", type: "meal", meal: "午餐", icon: "🍲", title: "北橋해바라기", desc: "濟州道民推薦순두부찌개，湯頭溫和不辣，近東門市場", nav: "제주 제주시 중앙로 46-8" },
-    { id: "d5-4", time: "17:30", type: "transport", icon: "⛽", title: "前往機場方向", desc: "記得先加滿油再還車" },
+    { id: "d5-4", time: "17:30", type: "transport", icon: "🔋", title: "前往機場方向", desc: "準備還車，記得確認電量是否符合合約歸還標準" },
     { id: "d5-5", time: "19:30", type: "transport", icon: "🚙", title: "樂天租車機場還車", desc: "" },
     { id: "d5-6", time: "", type: "meal", meal: "晚餐", icon: "🍜", title: "濟州機場美食街", desc: "國內線3樓，推薦고기국수（濟州豬肉湯麵）或海物本家（해물라면／전복죽），還車後直接走進航廈上樓即可" },
     { id: "d5-7", time: "22:40", type: "transport", icon: "✈️", title: "ZE885 搭機返台", desc: "23:50抵達桃園機場（當天）" },
@@ -1041,6 +1042,22 @@ function MoreView({ checklist, toggleCheck }) {
           <div className="text-[#4A3728] mt-0.5">主水槽玻璃船體驗，09:50-17:30間隨到隨玩，每次約20分鐘</div>
         </div>
         <div className="text-[10.5px] text-[#B79A6E] pt-1">💡 場次時間依當日公告為準，建議入場後先至服務台確認</div>
+      </div>
+
+      <SectionTitle icon={<Car size={18} color="#4A3728" />}>電動車充電資訊</SectionTitle>
+      <div className="bg-white rounded-2xl border-2 border-[#5B8C5A] p-4 text-[12.5px] space-y-2">
+        <div>
+          <div className="font-black text-[#5B8C5A]">免費充電服務商</div>
+          <div className="text-[#4A3728] mt-0.5">確認為韓國<b>環境部（환경부）</b>委託韓國汽車環境協會發行的「공공충전인프라 멤버십카드」，不是特定車廠專屬系統。取車時領取實體會員卡，還車時歸還。樂天租車優惠期間2026.04.28–2026.12.31，完整涵蓋行程日期</div>
+        </div>
+        <div>
+          <div className="font-black text-[#5B8C5A]">適用範圍</div>
+          <div className="text-[#4A3728] mt-0.5">全國環境部急速充電站，濟州島全島約150處，幾乎全島隨處可充；常見於E-Mart等大型超市、公家機關、公有停車場周邊，可用Naver Map搜尋「환경부 충전소」查詢</div>
+        </div>
+        <div>
+          <div className="font-black text-[#5B8C5A]">建議充電時段</div>
+          <div className="text-[#4A3728] mt-0.5">首選Day3–4入住君悅酒店期間（노형동／연동一帶充電站密度最高），晚上或早上出發前順路充一次即可；EV6滿電續航400公里以上，全程可能只需充電1次，不用每天特地規劃</div>
+        </div>
       </div>
 
       <CurrencyTool />
