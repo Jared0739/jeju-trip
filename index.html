@@ -95,11 +95,11 @@ const TRIP_START = new Date("2026-10-17T00:00:00+09:00");
 const TRIP_END = new Date("2026-10-21T23:59:59+09:00");
 
 const DAY_META = [
-  { day: 1, date: "10/17（六）", title: "抵達・入住神話世界", color: "#5B8C5A", tint: "#EAF3E9" },
-  { day: 2, date: "10/18（日）", title: "山茶花・Hello Kitty・正房瀑布・偶來市場", color: "#E8524A", tint: "#FCEAE8" },
-  { day: 3, date: "10/19（一）", title: "9.81 Park・迷你馬・童話村", color: "#3FA6A6", tint: "#E6F4F4" },
-  { day: 4, date: "10/20（二）", title: "城山日出峰・水上樂園", color: "#8B6FB7", tint: "#F0EBF7" },
-  { day: 5, date: "10/21（三）", title: "濟州市購物・賦歸", color: "#D98C9E", tint: "#FBEEF1" },
+  { day: 1, date: "10/17（六）", title: "抵達・入住神話世界", color: "#E8935E", tint: "#FDEEE5" },
+  { day: 2, date: "10/18（日）", title: "山茶花・Hello Kitty・正房瀑布・偶來市場", color: "#E890A8", tint: "#FCE9EF" },
+  { day: 3, date: "10/19（一）", title: "9.81 Park・迷你馬・童話村", color: "#7CA36B", tint: "#EAF1E7" },
+  { day: 4, date: "10/20（二）", title: "城山日出峰・水上樂園", color: "#7690D9", tint: "#E8EDFA" },
+  { day: 5, date: "10/21（三）", title: "濟州市購物・賦歸", color: "#9678BC", tint: "#EEE7F5" },
 ];
 
 // item type: transport | attraction | meal | hotel
@@ -174,8 +174,8 @@ const FOOD_LIST = [
 ];
 
 const HOTELS = [
-  { nights: "Day1－2", name: "濟州神話世界 Jeju Shinhwa World", addrZh: "西歸浦市安德面西廣里2518號", addrKo: "서귀포시 안덕면 서광리 2518", color: "#5B8C5A" },
-  { nights: "Day3－4", name: "濟州君悅酒店 Grand Hyatt Jeju", addrZh: "濟州市老衍路12號（老衡洞，濟州夢想大廈）", addrKo: "제주시 노연로 12", color: "#8B6FB7" },
+  { nights: "Day1－2", name: "濟州神話世界 Jeju Shinhwa World", addrZh: "西歸浦市安德面西廣里2518號", addrKo: "서귀포시 안덕면 서광리 2518", color: "#E9612B" },
+  { nights: "Day3－4", name: "濟州君悅酒店 Grand Hyatt Jeju", addrZh: "濟州市老衍路12號（老衡洞，濟州夢想大廈）", addrKo: "제주시 노연로 12", color: "#1E47C1" },
 ];
 
 const CHECKLIST_ITEMS = [
@@ -992,20 +992,20 @@ function MoreView({ checklist, toggleCheck }) {
       <SectionTitle icon={<HotelIcon size={18} color="#4A3728" />}>住宿資訊</SectionTitle>
       <div className="space-y-2">
         {HOTELS.map((h) => (
-          <div key={h.name} className="bg-white rounded-2xl border-2 p-4" style={{ borderColor: h.color }}>
-            <span className="text-[10px] font-black text-white px-2 py-0.5 rounded-full" style={{ background: h.color }}>{h.nights}</span>
+          <div key={h.name} className="bg-white rounded-2xl border-2 p-4" style={{ borderColor: "#4A3728" }}>
+            <span className="text-[10px] font-black text-white px-2 py-0.5 rounded-full" style={{ background: "#4A3728" }}>{h.nights}</span>
             <div className="font-bold text-[#4A3728] text-[14px] mt-2">{h.name}</div>
             <div className="text-[12px] text-[#9C8A73] mt-1">{h.addrZh}</div>
-            <button onClick={() => openNav(h.addrKo)} className="inline-flex items-center gap-1 text-[11.5px] font-bold mt-2 px-3 py-1 rounded-full text-white" style={{ background: h.color }}>
-              <Navigation2 size={11} /> 導航
+            <button onClick={() => openNav(h.addrKo)} className="inline-flex items-center gap-1 text-[11.5px] font-bold mt-2 px-3 py-1.5 rounded-full text-white" style={{ background: "#4A3728" }}>
+              <Navigation2 size={11} color="#FFFFFF" /> 導航
             </button>
           </div>
         ))}
       </div>
 
       <SectionTitle icon={<HotelIcon size={18} color="#4A3728" />}>飯店設施詳情</SectionTitle>
-      <div className="bg-white rounded-2xl border-2 border-[#5B8C5A] p-4 text-[12.5px] space-y-1.5">
-        <div className="font-black text-[#5B8C5A] text-[13.5px] mb-1">濟州神話世界（Day1-2）</div>
+      <div className="bg-white rounded-2xl border-2 border-[#4A3728] p-4 text-[12.5px] space-y-1.5">
+        <div className="font-black text-[#4A3728] text-[13.5px] mb-1">濟州神話世界（Day1-2）</div>
         <div className="flex justify-between"><span className="text-[#9C8A73]">入住／退房</span><span className="font-bold text-[#4A3728]">15:00／11:00</span></div>
         <div className="flex justify-between"><span className="text-[#9C8A73]">泳池</span><span className="font-bold text-[#4A3728]">09:00-22:00</span></div>
         <div className="flex justify-between"><span className="text-[#9C8A73]">水上樂園</span><span className="font-bold text-[#4A3728] text-right">11:00-19:00（10/12-31僅室內）</span></div>
@@ -1015,8 +1015,8 @@ function MoreView({ checklist, toggleCheck }) {
         <div className="flex justify-between"><span className="text-[#9C8A73]">購物</span><span className="font-bold text-[#4A3728] text-right">신세계사이먼Outlet在旁</span></div>
         <div className="flex justify-between"><span className="text-[#9C8A73]">特別活動</span><span className="font-bold text-[#4A3728] text-right">五六日20:10煙火秀</span></div>
       </div>
-      <div className="bg-white rounded-2xl border-2 border-[#8B6FB7] p-4 text-[12.5px] space-y-1.5">
-        <div className="font-black text-[#8B6FB7] text-[13.5px] mb-1">濟州君悅酒店（Day3-4）</div>
+      <div className="bg-white rounded-2xl border-2 border-[#4A3728] p-4 text-[12.5px] space-y-1.5">
+        <div className="font-black text-[#4A3728] text-[13.5px] mb-1">濟州君悅酒店（Day3-4）</div>
         <div className="flex justify-between"><span className="text-[#9C8A73]">入住／退房</span><span className="font-bold text-[#4A3728]">15:00／11:00</span></div>
         <div className="flex justify-between"><span className="text-[#9C8A73]">室內泳池</span><span className="font-bold text-[#4A3728] text-right">6樓，每日07:00-23:00</span></div>
         <div className="flex justify-between"><span className="text-[#9C8A73]">室外泳池</span><span className="font-bold text-[#4A3728] text-right">8樓無邊際泳池</span></div>
